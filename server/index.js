@@ -4,6 +4,8 @@ const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const massive = require('massive');
 
+const authCtrl = require('./controllers/authController')
+
 const app = express();
 
 app.use(express.json());
@@ -18,10 +20,19 @@ app.use(
   })
 );
 
-massive(CONNECTION_STRING).then(db => {
+massive({
+  connectionString: CONNECTION_STRING,
+  ssl: {rejectUnauthorized: false}
+}).then(db => {
+  console.log("Database connected")
   app.set('db', db);
 });
 
 app.listen(SERVER_PORT, () => {
   console.log(`Listening on port: ${SERVER_PORT}`);
 });
+
+
+app.post('/auth/signup', authCtrl.register)
+app.post('/auth/login', authCtrl.login)
+app.get('/auth/logout', authCtrl.logout)
